@@ -24,8 +24,9 @@ class ButtonActivator implements MessageComponentInterface {
 
 
         $msg_decoded = json_decode($msg);
-        $data = json_decode(file_get_contents("../../event-data.json"));
+        $data = json_decode(file_get_contents("event-data.json"));
         $data[$msg_decoded->session_no]->status = $msg_decoded->status;
+        echo json_encode($data);
         $saved = file_put_contents("event-data.json",json_encode($data));
         if($saved){
             foreach ($this->clients as $client) {
