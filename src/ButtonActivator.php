@@ -21,12 +21,30 @@ class ButtonActivator implements MessageComponentInterface {
         $numRecv = count($this->clients) - 1;
         echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
             , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
-        foreach ($this->clients as $client) {
-            if ($from !== $client) {
-                // The sender is not the receiver, send to each client connected
-                $client->send($msg);
+
+
+        $msg_decoded = json_decode($msg);
+        $data = json_decode(file_get_contents("../../event-data.json"));
+        $data[$msg_decoded->session_no]->status = $msg_decoded->status;
+        $saved = file_put_contents("event-data.json",json_encode($data));
+        if($saved){
+            foreach ($this->clients as $client) {
+                if ($from !== $client) {
+                    // The sender is not the receiver, send to each client connected
+                    $client->send($msg);
+                }
             }
         }
+        else
+        {
+            foreach ($this->clients as $client) {
+                if ($from !== $client) {
+                    // The sender is not the receiver, send to each client connected
+                    $client->send("Error");
+                }
+            }
+        }
+
     }
 
     public function onClose(ConnectionInterface $conn) {
